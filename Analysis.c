@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    for (int i = 0; i < n; i++) { //for verification
+    for (int i = 0; i < n; i++) { 
         printf("%lu ", arr[i]); 
     }
 
