@@ -13,22 +13,25 @@ int askUser(){ //asks what data generation method to use
     return choice;
 }
 
-void genRandInt(unsigned long int *arr, int size){ //generate random integer
-    for(int i = 0; i < size; i++){
-        arr[i] = (unsigned long int)rand() % (MAX_RANGE + 1);
+void genRandInt(unsigned long int *arr, size_t size){ //generate random integer
+    for (size_t i = 0; i < size; i++) {
+        unsigned long long high = rand();
+        unsigned long long low = rand();
+        unsigned long long combined = (high << 15) | low; 
+        arr[i] = (unsigned long int)(combined % (MAX_RANGE + 1));
     }
 }
 
-void genIncreasing(unsigned long int *arr, int size, unsigned long int start){ //generate increasing sequence
-    for (int i = 0; i < size; i++) {
+void genIncreasing(unsigned long int *arr, size_t size, unsigned long int start){ //generate increasing sequence
+    for (size_t i = 0; i < size; i++) {
         arr[i] = start + i;
     }
 }
 
 int main(int argc, char** argv) {
-    int n; //number of integers to be sorted
+    size_t n; //number of integers to be sorted
     printf("Enter number of integers: ");
-    if (scanf("%d", &n) != 1 || n <= 0){
+    if (scanf("%zu", &n) != 1 || n <= 0) {
         printf("Enter positive number.");
         return 1;
     } 
@@ -40,7 +43,7 @@ int main(int argc, char** argv) {
 
     int choice = askUser();
     if(choice == 1){
-        srand(time(NULL)); //seed to prevent same numbers
+        srand((unsigned int)time(NULL)); //seed to prevent same numbers
         genRandInt(arr, n);
     } else if (choice == 2){
         unsigned long int x; //starting point
@@ -53,7 +56,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    for (int i = 0; i < n; i++) { 
+    for (size_t i = 0; i < n; i++) { 
         printf("%lu ", arr[i]); 
     }
 
