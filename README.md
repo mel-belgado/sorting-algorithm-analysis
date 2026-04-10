@@ -8,6 +8,5 @@ performance.
 TODO:
 A.
 1. Write both the original and sorted values to an output file.
-2. Add performance measurement
 
 The Sorting Algorithms were slightly modified for type safety and to prevent memory risks.

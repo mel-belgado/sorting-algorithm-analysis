@@ -4,24 +4,17 @@
 #include <time.h>
 const unsigned long int MAX_RANGE = 1000000; //max value for unsigned long int
 
+void copyArray(unsigned long int *source, unsigned long int *dest, size_t n) { //copy the original unsorted array
+    for (size_t i = 0; i < n; i++) {
+        dest[i] = source[i];
+    }
+}
+
 int askUser(){ //asks what data generation method to use
     int choice;
     printf("Select data generation method: \n");
     printf("  1. Randomly Generate Integers\n");
     printf("  2. Increasing Sequence\n");
-    scanf("%d", &choice);
-    return choice;
-}
-
-int askSort(){ //asks sorting algorithm to use
-    int choice;
-    printf("Select sorting algorithm: \n");
-    printf("  1. Bubble Sort\n");
-    printf("  2. Selection Sort\n");
-    printf("  3. Insertion Sort\n");
-    printf("  4. Quick Sort\n");
-    printf("  5. Merge Sort\n");
-    printf("  6. Heap Sort\n");
     scanf("%d", &choice);
     return choice;
 }
@@ -44,12 +37,12 @@ void genIncreasing(unsigned long int *arr, size_t size, unsigned long int start)
 void showArr(unsigned long int *arr, size_t n){
     for (size_t i = 0; i < n; i++) { 
         printf("%lu ", arr[i]);
-        printf("\n");
     }
+    printf("\n");
 }
 
 void swap(unsigned long int *a, unsigned long int *b);
-int partition(unsigned long int arr[], int low, int high);
+long long partition(unsigned long int arr[], int low, int high);
 void merge(unsigned long int *arr, int l, int m, int r);
 void heapify(unsigned long int *arr, size_t n, size_t i);
 
@@ -62,7 +55,6 @@ void mergeSort(unsigned long int *arr, int l, int r);
 void heapSort(unsigned long int *arr, size_t n);
 
 
-
 int main(int argc, char** argv) {
     size_t n; //number of integers to be sorted
     printf("Enter number of integers: ");
@@ -73,64 +65,84 @@ int main(int argc, char** argv) {
 
     //allocate memory to heap instead of stack to prevent stack overflow when user inputs large number
     //dont use variable length arrays
-    unsigned long int *arr = malloc(n * sizeof(unsigned long int)); //store integers
+    unsigned long int *arr = malloc(n * sizeof(unsigned long int)); //original array
+    unsigned long int *arrCopy = malloc(n * sizeof(unsigned long int)); //copy
     if (!arr) return 1;
 
     int choice = askUser();
     if(choice == 1){
         srand((unsigned int)time(NULL)); //seed to prevent same numbers
         genRandInt(arr, n);
-        printf("Here is the randomly generated integers: \n");
     } else if (choice == 2){
         unsigned long int x; //starting point
         printf("Enter starting value: ");
         scanf("%lu", &x);
         genIncreasing(arr, n, x);
-        printf("Here is the increasing sequence of integers: \n");
     } else {
         printf("Invalid choice.");
         free(arr);
+        free(arrCopy);
         return 1;
     }
 
-    showArr(arr, n);
+    printf("\nTesting performance...please wait. \n");
 
-    int sortChoice = askSort();
-    switch (sortChoice)
-    {
-    case 1:
-        bubbleSort(arr, n);
-        break;
-    
-    case 2:
-        selectionSort(arr, n);
-        break;
-    
-    case 3:
-        insertionSort(arr, n);
-        break;
+    clock_t start, end;
+    double time_bubble, time_selection, time_insertion, time_quick, time_merge, time_heap;
 
-    case 4:
-        quickSort(arr, 0, n - 1);
-        break;
+    // TEST BUBBLE SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    bubbleSort(arrCopy, n);
+    end = clock();
+    time_bubble = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    case 5:
-        mergeSort(arr, 0, n - 1);
-        break;
+    // TEST SELECTION SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    selectionSort(arrCopy, n);
+    end = clock();
+    time_selection = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    case 6:
-        heapSort(arr, n);
-        break;
+    // TEST INSERTION SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    insertionSort(arrCopy, n);
+    end = clock();
+    time_insertion = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    default:
-        printf("Invalid choice.");
-        return 1;
-    }
+    // TEST QUICK SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    quickSort(arrCopy, 0, (int)n - 1);
+    end = clock();
+    time_quick = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    printf("Sorted: \n");
-    showArr(arr, n);
+    // TEST MERGE SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    mergeSort(arrCopy, 0, (int)n - 1);
+    end = clock();
+    time_merge = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    // TEST HEAP SORT
+    copyArray(arr, arrCopy, n);
+    start = clock();
+    heapSort(arrCopy, n);
+    end = clock();
+    time_heap = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    // DISPLAY SUMMARY TABLE
+    printf("\nPerformance Results (N = %zu):\n", n);
+    printf("Bubble Sort:   %f seconds\n", time_bubble);
+    printf("Quick Sort:    %f seconds\n", time_quick);
+    printf("Insertion Sort:   %f seconds\n", time_insertion);
+    printf("Selection Sort:    %f seconds\n", time_selection);
+    printf("Merge Sort:    %f seconds\n", time_merge);
+    printf("Heap Sort:    %f seconds\n", time_heap);
 
     free(arr);
+    free(arrCopy);
     return 0;
 }
 
@@ -194,8 +206,7 @@ void swap(unsigned long int *a, unsigned long int *b){
     *b = t;
 }
 
-// partition function
-int partition(unsigned long int arr[], int low, int high) {
+long long partition(unsigned long int arr[], int low, int high) {
     
     // Choose the pivot
     unsigned long int pivot = arr[high];
@@ -224,7 +235,7 @@ void quickSort(unsigned long int *arr, int low, int high) {
     if (low < high) {
         
         // pi is the partition return index of pivot
-        int pi = partition(arr, low, high);
+        long long pi = partition(arr, low, high);
 
         // recursion calls for smaller elements
         // and greater or equals elements
