@@ -6,5 +6,5 @@ Insertion Sort, Mergesort, Quicksort, and Heapsort by sorting randomly generated
 performance.
 
 Notes:
--The Sorting Algorithms were modified for type safety and to prevent memory risks.
--Quicksort uses a random pivot selection.
+The Sorting Algorithms were modified for type safety and to prevent memory risks.
+Quicksort uses a random pivot selection.
