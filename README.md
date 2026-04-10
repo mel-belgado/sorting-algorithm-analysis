@@ -10,3 +10,5 @@ A.
 1. Add Sorting algorithms -should be implemented as functions
 2. Write both the original and sorted values to an output file.
 3. Add performance measurement
+
+The Sorting Algorithms were slightly modified for type safety and to prevent memory risks.
