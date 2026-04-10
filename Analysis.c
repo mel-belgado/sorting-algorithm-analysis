@@ -43,7 +43,7 @@ void showArr(unsigned long int *arr, size_t n){
 
 void swap(unsigned long int *a, unsigned long int *b);
 long long partition(unsigned long int arr[], int low, int high);
-void merge(unsigned long int *arr, int l, int m, int r);
+void merge(unsigned long int *arr, unsigned long int *temp, int l, int m, int r);
 void heapify(unsigned long int *arr, size_t n, size_t i);
 
 //sorting algorithms
@@ -51,7 +51,7 @@ void bubbleSort(unsigned long int *arr, size_t n);
 void selectionSort(unsigned long int *arr, size_t n);
 void insertionSort(unsigned long int *arr, size_t n);
 void quickSort(unsigned long int *arr, int low, int high);
-void mergeSort(unsigned long int *arr, int l, int r);
+void mergeSort(unsigned long int *arr, unsigned long int *temp, int l, int r);
 void heapSort(unsigned long int *arr, size_t n);
 
 
@@ -139,9 +139,14 @@ int main(int argc, char** argv) {
     time_quick = ((double)(end - start)) / CLOCKS_PER_SEC;
 
     // TEST MERGE SORT
+    unsigned long int *temp = malloc(n * sizeof(unsigned long int));
+    if (!temp) {
+        printf("Memory allocation failed.");
+        return 1;
+    }
     copyArray(arr, arrCopy, n);
     start = clock();
-    mergeSort(arrCopy, 0, (int)n - 1);
+    mergeSort(arrCopy, temp, 0, (int)n - 1);
     end = clock();
     time_merge = ((double)(end - start)) / CLOCKS_PER_SEC;
 
@@ -155,9 +160,9 @@ int main(int argc, char** argv) {
     // DISPLAY SUMMARY TABLE
     printf("\nPerformance Results (N = %zu):\n", n);
     printf("Bubble Sort:   %f seconds\n", time_bubble);
-    printf("Quick Sort:    %f seconds\n", time_quick);
-    printf("Insertion Sort:   %f seconds\n", time_insertion);
     printf("Selection Sort:    %f seconds\n", time_selection);
+    printf("Insertion Sort:   %f seconds\n", time_insertion);
+    printf("Quick Sort:    %f seconds\n", time_quick);
     printf("Merge Sort:    %f seconds\n", time_merge);
     printf("Heap Sort:    %f seconds\n", time_heap);
 
@@ -176,6 +181,7 @@ int main(int argc, char** argv) {
 
     free(arr);
     free(arrCopy);
+    free(temp);
     return 0;
 }
 
@@ -282,70 +288,41 @@ void quickSort(unsigned long int *arr, int low, int high) {
     }
 }
 
-void merge(unsigned long int *arr, int l, int m, int r) {
-    int i, j, k;
-    int n1 = m - l + 1;
-    int n2 = r - m;
+void merge(unsigned long int *arr, unsigned long int *temp, int l, int m, int r) {
+    int i = l;      // Initial index of first subarray
+    int j = m + 1;  // Initial index of second subarray
+    int k = l;      // Initial index of merged subarray
 
-    unsigned long int *L = malloc(n1 * sizeof(unsigned long int));
-    unsigned long int *R = malloc(n2 * sizeof(unsigned long int));
-
-    if (!L || !R) {
-        printf("Merge allocation failed\n");
-        exit(1);
+    // Copy data to temp array
+    for (int idx = l; idx <= r; idx++) {
+        temp[idx] = arr[idx];
     }
 
-    // Copy data to temp arrays L[] and R[]
-    for (i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-
-    // Merge the temp arrays back into arr[l..r
-    i = 0;
-    j = 0;
-    k = l;
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            i++;
+    // Merge the temp arrays back into arr[l..r]
+    while (i <= m && j <= r) {
+        if (temp[i] <= temp[j]) {
+            arr[k++] = temp[i++];
+        } else {
+            arr[k++] = temp[j++];
         }
-        else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
     }
 
-    // Copy the remaining elements of L[],
-    // if there are any
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
+    // Copy remaining elements of the left half, if any
+    while (i <= m) {
+        arr[k++] = temp[i++];
     }
-
-    // Copy the remaining elements of R[],
-    // if there are any
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
-
-    free(L);
-    free(R);
+    // Note: Right half elements are already in place in 'arr' if 'temp' is a copy
 }
 
-void mergeSort(unsigned long int *arr, int l, int r) {
+void mergeSort(unsigned long int *arr, unsigned long int *temp, int l, int r) {
     if (l < r) {
         int m = l + (r - l) / 2; 
 
         // Sort first and second halves
-        mergeSort(arr, l, m);
-        mergeSort(arr, m + 1, r);
+        mergeSort(arr, temp, l, m);
+        mergeSort(arr, temp, m + 1, r);
 
-        merge(arr, l, m, r);
+        merge(arr, temp, l, m, r);
     }
 }
 
