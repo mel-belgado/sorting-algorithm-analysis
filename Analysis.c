@@ -67,8 +67,10 @@ int main(int argc, char** argv) {
     //dont use variable length arrays
     unsigned long int *arr = malloc(n * sizeof(unsigned long int)); //original array
     unsigned long int *arrCopy = malloc(n * sizeof(unsigned long int)); //copy
-    if (!arr) return 1;
-
+    if (!arr || !arrCopy) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
     int choice = askUser();
     if(choice == 1){
         srand((unsigned int)time(NULL)); //seed to prevent same numbers
@@ -239,7 +241,12 @@ void swap(unsigned long int *a, unsigned long int *b){
 
 long long partition(unsigned long int arr[], int low, int high) {
     
-    // Choose the pivot
+    //Pick a random index between low and high
+    int random = low + rand() % (high - low + 1);
+
+    //Swap it with the high element
+    swap(&arr[random], &arr[high]);
+
     unsigned long int pivot = arr[high];
     
     // Index of smaller element and indicates 
