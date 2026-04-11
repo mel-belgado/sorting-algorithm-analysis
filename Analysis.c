@@ -101,27 +101,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    //WRITE OUTPUT FILE
-    FILE *fp = fopen("output.txt", "w");
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        free(arr);
-        free(arrCopy);
-        free(temp);
-        return 1;
-    }
-    fprintf(fp, "Original Array:\n");
-    size_t newline = 0;
-    for (size_t i = 0; i < n; i++) { 
-        fprintf(fp, "%lu ", arr[i]);
-        newline++;
-        if(newline == 10){
-            fprintf(fp, "\n");
-            newline = 0;
-        }
-    }
-    fprintf(fp, "\n\n");
-
     printf("\nTesting performance...please wait. \n");
 
     clock_t start, end;
@@ -178,7 +157,27 @@ int main(int argc, char** argv) {
     printf("Merge Sort:    %f seconds\n", time_merge);
     printf("Heap Sort:    %f seconds\n", time_heap);
 
-    //FILE
+    //WRITE OUTPUT FILE
+    FILE *fp = fopen("output.txt", "w");
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        free(arr);
+        free(arrCopy);
+        free(temp);
+        return 1;
+    }
+    fprintf(fp, "Original Array:\n");
+    size_t newline = 0;
+    for (size_t i = 0; i < n; i++) { 
+        fprintf(fp, "%lu ", arr[i]);
+        newline++;
+        if(newline == 10){
+            fprintf(fp, "\n");
+            newline = 0;
+        }
+    }
+    fprintf(fp, "\n\n");
+    
     fprintf(fp, "Sorted Array: \n");
     newline = 0;
     for (size_t i = 0; i < n; i++) {
