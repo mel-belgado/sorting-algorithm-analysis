@@ -10,21 +10,24 @@ void copyArray(unsigned long int *source, unsigned long int *dest, size_t n) { /
     }
 }
 
-int askUser(){ //asks what data generation method to use
+int askUser() {
     int choice;
     printf("Select data generation method: \n");
     printf("  1. Randomly Generate Integers\n");
     printf("  2. Increasing Sequence\n");
-    scanf("%d", &choice);
+    printf("Enter choice: ");
+    while (scanf("%d", &choice) != 1 || (choice != 1 && choice != 2)) {
+        while (getchar() != '\n');
+        printf("Invalid input. Enter 1 or 2: ");
+    }
     return choice;
 }
 
-void genRandInt(unsigned long int *arr, size_t size){ //generate random integer
+void genRandInt(unsigned long int *arr, size_t size) { //generate random integer
     for (size_t i = 0; i < size; i++) {
-        unsigned long long high = rand();
-        unsigned long long low = rand();
-        unsigned long long combined = (high << 15) | low; 
-        arr[i] = (unsigned long int)(combined % (MAX_RANGE + 1));
+        // Combine 3 rand() calls to safely cover 30+ bits
+        unsigned long long r = ((unsigned long long)rand() << 30) | ((unsigned long long)rand() << 15) | rand();
+        arr[i] = (unsigned long int)(r % (MAX_RANGE + 1));
     }
 }
 
@@ -42,23 +45,23 @@ void showArr(unsigned long int *arr, size_t n){
 }
 
 void swap(unsigned long int *a, unsigned long int *b);
-long long partition(unsigned long int arr[], int low, int high);
-void merge(unsigned long int *arr, unsigned long int *temp, int l, int m, int r);
+long long partition(unsigned long int arr[], long long low, long long high);
+void merge(unsigned long int *arr, unsigned long int *temp, size_t l, size_t m, size_t r);
 void heapify(unsigned long int *arr, size_t n, size_t i);
 
 //sorting algorithms
 void bubbleSort(unsigned long int *arr, size_t n);
 void selectionSort(unsigned long int *arr, size_t n);
 void insertionSort(unsigned long int *arr, size_t n);
-void quickSort(unsigned long int *arr, int low, int high);
-void mergeSort(unsigned long int *arr, unsigned long int *temp, int l, int r);
+void quickSort(unsigned long int *arr, long long low, long long high);
+void mergeSort(unsigned long int *arr, unsigned long int *temp, size_t l, size_t r);
 void heapSort(unsigned long int *arr, size_t n);
 
 
 int main(int argc, char** argv) {
     size_t n; //number of integers to be sorted
     printf("Enter number of integers: ");
-    if (scanf("%zu", &n) != 1 || n <= 0) {
+    if (scanf("%zu", &n) != 1 || n == 0) {
         printf("Enter positive number.");
         return 1;
     } 
@@ -67,23 +70,34 @@ int main(int argc, char** argv) {
     //dont use variable length arrays
     unsigned long int *arr = malloc(n * sizeof(unsigned long int)); //original array
     unsigned long int *arrCopy = malloc(n * sizeof(unsigned long int)); //copy
-    if (!arr || !arrCopy) {
+    unsigned long int *temp = malloc(n * sizeof(unsigned long int)); //pre-allocated array for merge sort
+    if (!arr || !arrCopy || !temp) {
         printf("Memory allocation failed.\n");
+        free(arr);
+        free(arrCopy);
+        free(temp);
         return 1;
     }
     int choice = askUser();
+    srand((unsigned int)time(NULL)); //seed to prevent same numbers
     if(choice == 1){
-        srand((unsigned int)time(NULL)); //seed to prevent same numbers
         genRandInt(arr, n);
     } else if (choice == 2){
         unsigned long int x; //starting point
         printf("Enter starting value: ");
-        scanf("%lu", &x);
+        if (scanf("%lu", &x) != 1) {
+            printf("Invalid input.\n");
+            free(arr); 
+            free(arrCopy); 
+            free(temp);
+            return 1;
+        }
         genIncreasing(arr, n, x);
     } else {
         printf("Invalid choice.");
         free(arr);
         free(arrCopy);
+        free(temp);
         return 1;
     }
 
@@ -91,6 +105,9 @@ int main(int argc, char** argv) {
     FILE *fp = fopen("output.txt", "w");
     if (fp == NULL) {
         printf("Error opening file!\n");
+        free(arr);
+        free(arrCopy);
+        free(temp);
         return 1;
     }
     fprintf(fp, "Original Array:\n");
@@ -134,19 +151,14 @@ int main(int argc, char** argv) {
     // TEST QUICK SORT
     copyArray(arr, arrCopy, n);
     start = clock();
-    quickSort(arrCopy, 0, (int)n - 1);
+    quickSort(arrCopy, 0, (long long)n - 1);
     end = clock();
     time_quick = ((double)(end - start)) / CLOCKS_PER_SEC;
 
     // TEST MERGE SORT
-    unsigned long int *temp = malloc(n * sizeof(unsigned long int));
-    if (!temp) {
-        printf("Memory allocation failed.");
-        return 1;
-    }
     copyArray(arr, arrCopy, n);
     start = clock();
-    mergeSort(arrCopy, temp, 0, (int)n - 1);
+    mergeSort(arrCopy, temp, 0, n - 1);
     end = clock();
     time_merge = ((double)(end - start)) / CLOCKS_PER_SEC;
 
@@ -186,6 +198,7 @@ int main(int argc, char** argv) {
 }
 
 void bubbleSort(unsigned long int *arr, size_t n){
+    if (n == 0) return;
     for (size_t i = 0; i < n - 1; i++){
         for (size_t j = 0; j < n - i - 1; j++) {
             if(arr[j] > arr[j + 1]) {
@@ -199,6 +212,7 @@ void bubbleSort(unsigned long int *arr, size_t n){
 }
 
 void selectionSort(unsigned long int *arr, size_t n){
+    if (n == 0) return;
     for (size_t i = 0; i < n - 1; i++) {
       
         // Assume the current position holds
@@ -245,10 +259,10 @@ void swap(unsigned long int *a, unsigned long int *b){
     *b = t;
 }
 
-long long partition(unsigned long int arr[], int low, int high) {
+long long partition(unsigned long int arr[], long long low, long long high) {
     
     //Pick a random index between low and high
-    int random = low + rand() % (high - low + 1);
+    long long random = low + rand() % (high - low + 1);
 
     //Swap it with the high element
     swap(&arr[random], &arr[high]);
@@ -262,7 +276,7 @@ long long partition(unsigned long int arr[], int low, int high) {
     // Traverse arr[low..high] and move all smaller
     // elements to the left side. Elements from low to 
     // i are smaller after every iteration  
-    for (int j = low; j <= high - 1; j++) {
+    for (long long j = low; j <= high - 1; j++) {
         if (arr[j] < pivot) {
             i++;
             swap(&arr[i], &arr[j]);
@@ -275,8 +289,8 @@ long long partition(unsigned long int arr[], int low, int high) {
     return i + 1;
 }
 
-void quickSort(unsigned long int *arr, int low, int high) {
-    if (low < high) {
+void quickSort(unsigned long int *arr, long long low, long long high) {
+        if (low < high) {
         
         // pi is the partition return index of pivot
         long long pi = partition(arr, low, high);
@@ -285,16 +299,16 @@ void quickSort(unsigned long int *arr, int low, int high) {
         // and greater or equals elements
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
-    }
+        }
 }
 
-void merge(unsigned long int *arr, unsigned long int *temp, int l, int m, int r) {
-    int i = l;      // Initial index of first subarray
-    int j = m + 1;  // Initial index of second subarray
-    int k = l;      // Initial index of merged subarray
+void merge(unsigned long int *arr, unsigned long int *temp, size_t l, size_t m, size_t r) {
+    size_t i = l;      // Initial index of first subarray
+    size_t j = m + 1;  // Initial index of second subarray
+    size_t k = l;      // Initial index of merged subarray
 
     // Copy data to temp array
-    for (int idx = l; idx <= r; idx++) {
+    for (size_t idx = l; idx <= r; idx++) {
         temp[idx] = arr[idx];
     }
 
@@ -314,9 +328,9 @@ void merge(unsigned long int *arr, unsigned long int *temp, int l, int m, int r)
     // Note: Right half elements are already in place in 'arr' if 'temp' is a copy
 }
 
-void mergeSort(unsigned long int *arr, unsigned long int *temp, int l, int r) {
+void mergeSort(unsigned long int *arr, unsigned long int *temp, size_t l, size_t r) {
     if (l < r) {
-        int m = l + (r - l) / 2; 
+        size_t m = l + (r - l) / 2; 
 
         // Sort first and second halves
         mergeSort(arr, temp, l, m);
@@ -326,38 +340,28 @@ void mergeSort(unsigned long int *arr, unsigned long int *temp, int l, int r) {
     }
 }
 
-// To heapify a subtree rooted with node i
 void heapify(unsigned long int *arr, size_t n, size_t i) {
+    while (1) {
+        size_t largest = i;
+        size_t l = 2 * i + 1;
+        size_t r = 2 * i + 2;
 
-    // Initialize largest as root
-    size_t largest = i;
+        if (l < n && arr[l] > arr[largest]) largest = l;
+        if (r < n && arr[r] > arr[largest]) largest = r;
 
-    // left index = 2*i + 1
-    size_t l = 2 * i + 1;
-
-    // right index = 2*i + 2
-    size_t r = 2 * i + 2;
-
-    // If left child is larger than root
-    if (l < n && arr[l] > arr[largest])
-        largest = l;
-
-    // If right child is larger than largest so far
-    if (r < n && arr[r] > arr[largest])
-        largest = r;
-
-    // If largest is not root
-    if (largest != i) {
-        unsigned long int temp = arr[i];
-        arr[i] = arr[largest];
-        arr[largest] = temp;
-
-        // Recursively heapify the affected sub-tree
-        heapify(arr, n, largest);
+        if (largest != i) {
+            unsigned long int temp = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = temp;
+            i = largest; // Move down the tree
+        } else {
+            break;
+        }
     }
 }
 
 void heapSort(unsigned long int *arr, size_t n) {
+    if (n == 0) return;
     // Build heap (rearrange vector)
     for (long long i = (long long)n / 2 - 1; i >= 0; i--)
         heapify(arr, n, (size_t)i);
