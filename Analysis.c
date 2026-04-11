@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
         free(temp);
         return 1;
     }
-    fprintf(fp, "Original Array:\n");
+    fprintf(fp, "Unsorted:\n");
     size_t newline = 0;
     for (size_t i = 0; i < n; i++) { 
         fprintf(fp, "%lu ", arr[i]);
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
     }
     fprintf(fp, "\n\n");
     
-    fprintf(fp, "Sorted Array: \n");
+    fprintf(fp, "Sorted: \n");
     newline = 0;
     for (size_t i = 0; i < n; i++) {
         fprintf(fp, "%lu ", arrCopy[i]);
