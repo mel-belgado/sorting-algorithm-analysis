@@ -25,7 +25,7 @@ int askUser() {
 
 void genRandInt(unsigned long int *arr, size_t size) { //generate random integer
     for (size_t i = 0; i < size; i++) {
-        unsigned long long r = (unsigned long long)rand() * (RAND_MAX + 1ULL) + rand();
+        unsigned long int r = (unsigned long int)rand() * (RAND_MAX + 1U) + rand();
         arr[i] = (unsigned long int)(r % (MAX_RANGE + 1));
     }
 }
@@ -44,7 +44,7 @@ void showArr(unsigned long int *arr, size_t n){
 }
 
 void swap(unsigned long int *a, unsigned long int *b);
-long long partition(unsigned long int arr[], long long low, long long high);
+int partition(unsigned long int arr[], int low, int high);
 void merge(unsigned long int *arr, unsigned long int *temp, size_t l, size_t m, size_t r);
 void heapify(unsigned long int *arr, size_t n, size_t i);
 
@@ -52,7 +52,7 @@ void heapify(unsigned long int *arr, size_t n, size_t i);
 void bubbleSort(unsigned long int *arr, size_t n);
 void selectionSort(unsigned long int *arr, size_t n);
 void insertionSort(unsigned long int *arr, size_t n);
-void quickSort(unsigned long int *arr, long long low, long long high);
+void quickSort(unsigned long int *arr, int low, int high);
 void mergeSort(unsigned long int *arr, unsigned long int *temp, size_t l, size_t r);
 void heapSort(unsigned long int *arr, size_t n);
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     // TEST QUICK SORT
     copyArray(arr, arrCopy, n);
     start = clock();
-    quickSort(arrCopy, 0, (long long)n - 1);
+    quickSort(arrCopy, 0, (int)n - 1);
     end = clock();
     time_quick = ((double)(end - start)) / CLOCKS_PER_SEC;
 
@@ -238,7 +238,7 @@ void selectionSort(unsigned long int *arr, size_t n){
 void insertionSort(unsigned long int *arr, size_t n) {
     for (size_t i = 1; i < n; ++i) {
         unsigned long int key = arr[i];
-        long long j = (long long)i - 1;
+        int j = (int)i - 1;
 
         /* Move elements of arr[0..i-1], that are
            greater than key, to one position ahead
@@ -257,10 +257,10 @@ void swap(unsigned long int *a, unsigned long int *b){
     *b = t;
 }
 
-long long partition(unsigned long int arr[], long long low, long long high) {
+int partition(unsigned long int arr[], int low, int high) {
     
     //Pick a random index between low and high
-    long long random = low + rand() % (high - low + 1);
+    int random = low + rand() % (high - low + 1);
 
     //Swap it with the high element
     swap(&arr[random], &arr[high]);
@@ -269,12 +269,12 @@ long long partition(unsigned long int arr[], long long low, long long high) {
     
     // Index of smaller element and indicates 
     // the right position of pivot found so far
-    long long i = low - 1;
+    int i = low - 1;
 
     // Traverse arr[low..high] and move all smaller
     // elements to the left side. Elements from low to 
     // i are smaller after every iteration  
-    for (long long j = low; j <= high - 1; j++) {
+    for (int j = low; j <= high - 1; j++) {
         if (arr[j] < pivot) {
             i++;
             swap(&arr[i], &arr[j]);
@@ -287,11 +287,11 @@ long long partition(unsigned long int arr[], long long low, long long high) {
     return i + 1;
 }
 
-void quickSort(unsigned long int *arr, long long low, long long high) {
+void quickSort(unsigned long int *arr, int low, int high) {
         if (low < high) {
         
         // pi is the partition return index of pivot
-        long long pi = partition(arr, low, high);
+        int pi = partition(arr, low, high);
 
         // recursion calls for smaller elements
         // and greater or equals elements
@@ -361,11 +361,11 @@ void heapify(unsigned long int *arr, size_t n, size_t i) {
 void heapSort(unsigned long int *arr, size_t n) {
     if (n == 0) return;
     // Build heap (rearrange vector)
-    for (long long i = (long long)n / 2 - 1; i >= 0; i--)
+    for (int i = (int)n / 2 - 1; i >= 0; i--)
         heapify(arr, n, (size_t)i);
 
     // One by one extract an element from heap
-    for (long long i = (long long)n - 1; i > 0; i--) {
+    for (int i = (int)n - 1; i > 0; i--) {
 
         // Move current root to end
         unsigned long int temp = arr[0];
