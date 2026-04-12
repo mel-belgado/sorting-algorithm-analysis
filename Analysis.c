@@ -25,8 +25,7 @@ int askUser() {
 
 void genRandInt(unsigned long int *arr, size_t size) { //generate random integer
     for (size_t i = 0; i < size; i++) {
-        // Combine 3 rand() calls to safely cover 30+ bits
-        unsigned long long r = ((unsigned long long)rand() << 30) | ((unsigned long long)rand() << 15) | rand();
+        unsigned long long r = (unsigned long long)rand() * (RAND_MAX + 1ULL) + rand();
         arr[i] = (unsigned long int)(r % (MAX_RANGE + 1));
     }
 }
